@@ -1,0 +1,73 @@
+{% extends 'cal/base.html' %}
+
+{% block content %}
+<div class="text-center mt-3 mb-2">
+  <h3>{{ current_year }}년 {{ current_month }}월</h3>
+</div>
+
+<div class="clearfix mb-3">
+  <a class="btn btn-info float-start" href="/?{{ prev_month }}">← 이전 달</a>
+  <a class="btn btn-info float-end" href="/?{{ next_month }}">다음 달 →</a>
+</div>
+
+<a href="{% url 'cal:event_new' %}" class="btn btn-new">일정 추가</a>
+<a href="{% url 'cal:account' %}" class="btn btn-new-account">손익 추가</a>
+
+<button id="optimize-btn" class="btn btn-warning mt-2">GPT로 일정 최적화</button>
+<button id="generate-btn" class="btn btn-secondary mt-2">가상 일정 생성</button>
+<pre id="gpt-output"></pre>
+
+<div class="mt-3">
+  {{ calendar|safe }}
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie("csrftoken");
+
+document.getElementById("generate-btn").addEventListener("click", () => {
+    fetch("/cal/generate-test-events/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+        },
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        location.reload();
+    });
+});
+
+document.getElementById("optimize-btn").addEventListener("click", () => {
+    fetch("/cal/optimize-events/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("gpt-output").textContent = data.output;
+    })
+    .catch(err => {
+        document.getElementById("gpt-output").textContent = "에러 발생: " + err;
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'cal/base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>이 이벤트를 삭제하시겠습니까?</h2>
+    <p><strong>{{ object.title }}</strong></p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">삭제</button>
+      <a href="{% url 'calendar' %}" class="btn btn-secondary">취소</a>
+    </form>
+  </div>
+{% endblock %}
